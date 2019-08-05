@@ -4,7 +4,6 @@ from zope.component import queryAdapter
 
 
 class NormalizingNameChooserSymlink(NormalizingNameChooser):
-
     def chooseName(self, name, object):
         adapter = queryAdapter(object, INameFromTitle)
         if adapter:
