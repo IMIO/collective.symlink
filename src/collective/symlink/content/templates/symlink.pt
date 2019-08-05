@@ -1,13 +1,3 @@
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
-      xmlns:tal="http://xml.zope.org/namespaces/tal"
-      xmlns:metal="http://xml.zope.org/namespaces/metal"
-      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
-      lang="en"
-      metal:use-macro="context/main_template/macros/master"
-      i18n:domain="collective.symlink">
-  <body>
-    <metal:main fill-slot="main">
-      TODO
-    </metal:main>
-  </body>
-</html>
+<tal:to_obj tal:define="to_obj context/symbolic_link/to_object">
+  <div tal:replace="structure to_obj" />
+</tal:to_obj>
