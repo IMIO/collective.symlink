@@ -7,6 +7,8 @@ from plone.formwidget.contenttree import ObjPathSourceBinder
 from plone.supermodel import model
 from z3c.relationfield.schema import RelationChoice
 from zope.interface import implements
+from plone.app.content.interfaces import INameFromTitle
+
 
 
 class ISymlink(model.Schema):

@@ -18,4 +18,19 @@
       directory="static"
       />
 
+  <adapter
+    provides="plone.app.content.interfaces.INameFromTitle"
+    factory=".symlinkname.NameFromSymLink"
+    />
+
+  <adapter
+    for="plone.dexterity.interfaces.IDexterityContent"
+    factory=".namechooser.NormalizingNameChooserSymlink"
+  />
+
+  <adapter
+    for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+    factory=".namechooser.NormalizingNameChooserSymlink"
+  />
+
 </configure>
