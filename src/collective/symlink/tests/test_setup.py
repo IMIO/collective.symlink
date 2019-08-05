@@ -3,10 +3,18 @@
 from plone import api
 from plone.app.testing import setRoles
 from plone.app.testing import TEST_USER_ID
-from Products.CMFPlone.utils import get_installer
 from collective.symlink.testing import COLLECTIVE_SYMLINK_INTEGRATION_TESTING  # noqa
 
 import unittest
+import pkg_resources
+
+try:
+    pkg_resources.get_distribution("Products.CMFPlone.utils.get_installer")
+except pkg_resources.DistributionNotFound:
+    HAS_PLONE5 = False
+else:
+    HAS_PLONE5 = True
+    from Products.CMFPlone.utils import get_installer
 
 
 class TestSetup(unittest.TestCase):
@@ -17,11 +25,17 @@ class TestSetup(unittest.TestCase):
     def setUp(self):
         """Custom shared utility setup for tests."""
         self.portal = self.layer["portal"]
-        self.installer = get_installer(self.portal, self.layer["request"])
+        if HAS_PLONE5:
+            self.installer = get_installer(self.portal, self.layer["request"])
+        else:
+            self.installer = api.portal.get_tool("portal_quickinstaller")
 
     def test_product_installed(self):
         """Test if collective.symlink is installed."""
-        self.assertTrue(self.installer.is_product_installed("collective.symlink"))
+        if HAS_PLONE5:
+            self.assertTrue(self.installer.is_product_installed("collective.symlink"))
+        else:
+            self.assertTrue(self.installer.isProductInstalled("collective.symlink"))
 
     def test_browserlayer(self):
         """Test that ICollectiveSymlinkLayer is registered."""
@@ -37,15 +51,24 @@ class TestUninstall(unittest.TestCase):
 
     def setUp(self):
         self.portal = self.layer["portal"]
-        self.installer = get_installer(self.portal, self.layer["request"])
+        if HAS_PLONE5:
+            self.installer = get_installer(self.portal, self.layer["request"])
+        else:
+            self.installer = api.portal.get_tool("portal_quickinstaller")
         roles_before = api.user.get_roles(TEST_USER_ID)
         setRoles(self.portal, TEST_USER_ID, ["Manager"])
-        self.installer.uninstall_product("collective.symlink")
+        if HAS_PLONE5:
+            self.installer.uninstall_product("collective.symlink")
+        else:
+            self.installer.uninstallProducts(["collective.symlink"])
         setRoles(self.portal, TEST_USER_ID, roles_before)
 
     def test_product_uninstalled(self):
         """Test if collective.symlink is cleanly uninstalled."""
-        self.assertFalse(self.installer.is_product_installed("collective.symlink"))
+        if HAS_PLONE5:
+            self.assertFalse(self.installer.is_product_installed("collective.symlink"))
+        else:
+            self.assertFalse(self.installer.isProductInstalled("collective.symlink"))
 
     def test_browserlayer_removed(self):
         """Test that ICollectiveSymlinkLayer is removed."""
