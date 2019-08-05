@@ -7,7 +7,7 @@
       i18n:domain="collective.symlink">
   <body>
     <metal:main fill-slot="main">
-
+      TODO
     </metal:main>
   </body>
 </html>
