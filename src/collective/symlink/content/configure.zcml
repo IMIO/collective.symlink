@@ -1,0 +1,15 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="collective.symlink">
+
+  <browser:page
+      for=".symlink.ISymlink"
+      name="view"
+      class=".symlink.SymlinkView"
+      template="templates/symlink.pt"
+      permission="zope2.View"
+      layer="..interfaces.ICollectiveSymlinkLayer"
+      />
+
+</configure>

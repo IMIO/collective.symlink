@@ -21,7 +21,7 @@ class CollectiveSymlinkLayer(PloneSandboxLayer):
         self.loadZCML(package=collective.symlink)
 
     def setUpPloneSite(self, portal):
-        applyProfile(portal, 'collective.symlink:default')
+        applyProfile(portal, "collective.symlink:default")
 
 
 COLLECTIVE_SYMLINK_FIXTURE = CollectiveSymlinkLayer()
@@ -29,13 +29,12 @@ COLLECTIVE_SYMLINK_FIXTURE = CollectiveSymlinkLayer()
 
 COLLECTIVE_SYMLINK_INTEGRATION_TESTING = IntegrationTesting(
     bases=(COLLECTIVE_SYMLINK_FIXTURE,),
-    name='CollectiveSymlinkLayer:IntegrationTesting',
+    name="CollectiveSymlinkLayer:IntegrationTesting",
 )
 
 
 COLLECTIVE_SYMLINK_FUNCTIONAL_TESTING = FunctionalTesting(
-    bases=(COLLECTIVE_SYMLINK_FIXTURE,),
-    name='CollectiveSymlinkLayer:FunctionalTesting',
+    bases=(COLLECTIVE_SYMLINK_FIXTURE,), name="CollectiveSymlinkLayer:FunctionalTesting"
 )
 
 
@@ -45,5 +44,5 @@ COLLECTIVE_SYMLINK_ACCEPTANCE_TESTING = FunctionalTesting(
         REMOTE_LIBRARY_BUNDLE_FIXTURE,
         z2.ZSERVER_FIXTURE,
     ),
-    name='CollectiveSymlinkLayer:AcceptanceTesting',
+    name="CollectiveSymlinkLayer:AcceptanceTesting",
 )
