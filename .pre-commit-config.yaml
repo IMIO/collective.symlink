@@ -1,0 +1,126 @@
+repos:
+  -
+    repo: 'https://github.com/chriskuehl/puppet-pre-commit-hooks.git'
+    rev: v2.0.1
+    hooks:
+      -
+        id: puppet-validate
+        stages:
+          - commit
+          - push
+      -
+        id: erb-validate
+        stages:
+          - commit
+          - push
+      -
+        id: epp-validate
+        stages:
+          - commit
+          - push
+      -
+        id: puppet-lint
+        stages:
+          - commit
+          - push
+  -
+    repo: 'git://github.com/pre-commit/pre-commit-hooks'
+    rev: v1.2.3
+    hooks:
+      -
+        id: trailing-whitespace
+        stages:
+          - commit
+          - push
+      -
+        id: check-json
+        stages:
+          - commit
+          - push
+      -
+        id: flake8
+        stages:
+          - commit
+          - push
+        exclude: ^bootstrap.py$
+      -
+        id: check-yaml
+        stages:
+          - commit
+          - push
+      -
+        id: check-json
+        stages:
+          - commit
+          - push
+      -
+        id: check-merge-conflict
+        stages:
+          - commit
+          - push
+      -
+        id: debug-statements
+        stages:
+          - commit
+          - push
+      -
+        id: fix-encoding-pragma
+        stages:
+          - commit
+          - push
+      -
+        id: check-symlinks
+        stages:
+          - commit
+          - push
+      -
+        id: debug-statements
+        stages:
+          - commit
+          - push
+  -
+    repo: 'https://github.com/jumanjihouse/pre-commit-hooks.git'
+    rev: 1.6.0
+    hooks:
+      -
+        id: shellcheck
+        stages:
+          - commit
+          - push
+      -
+        id: shfmt
+        stages:
+          - commit
+          - push
+  -
+    repo: 'https://github.com/asottile/yesqa'
+    rev: f657d64b0ca01f7f44ee0006c2990af988139c28
+    hooks:
+      -
+        id: yesqa
+        stages:
+          - commit
+          - push
+  -
+    repo: 'https://github.com/adrienverge/yamllint'
+    rev: 506e066410052c42da36c237b8ba3c661448c86b
+    hooks:
+      -
+        id: yamllint
+        stages:
+          - commit
+          - push
+  -
+    repo: local
+    hooks:
+      -
+        id: check-dockerfile
+        name: 'Check dockerfile'
+        entry: 'bash -c "docker run --rm -i hadolint/hadolint < Dockerfile"'
+        pass_filenames: false
+        language: system
+        types:
+          - dockerfile
+        stages:
+          - commit
+          - push
