@@ -1,0 +1,5 @@
+==================
+collective.symlink
+==================
+
+User documentation
