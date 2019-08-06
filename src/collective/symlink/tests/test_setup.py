@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """Setup tests for this package."""
-from plone import api
-from plone.app.testing import setRoles
-from plone.app.testing import TEST_USER_ID
+
 from collective.symlink.testing import COLLECTIVE_SYMLINK_INTEGRATION_TESTING  # noqa
+from plone import api
+from plone.app.testing import TEST_USER_ID
+from plone.app.testing import setRoles
 
 import unittest
 import pkg_resources
