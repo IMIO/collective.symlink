@@ -1,3 +1,0 @@
-<tal:to_obj tal:define="to_obj context/symbolic_link/to_object">
-  <div tal:replace="structure to_obj" />
-</tal:to_obj>

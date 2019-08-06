@@ -7,7 +7,6 @@
       for=".symlink.ISymlink"
       name="view"
       class=".symlink.SymlinkView"
-      template="templates/symlink.pt"
       permission="zope2.View"
       layer="..interfaces.ICollectiveSymlinkLayer"
       />

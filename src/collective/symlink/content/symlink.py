@@ -18,6 +18,27 @@ class ISymlink(model.Schema):
 class Symlink(Container):
     implements(ISymlink)
 
+    def __call__(self):
+        link_obj = self.symbolic_link.to_object
+        template = link_obj.unrestrictedTraverse(link_obj.getLayout())
+        template.context = AdaptedContext(self)
+        return template()
+
+
+class AdaptedContext(object):
+    _not_inherited_attrs = ("id", "absolute_url", "__parent__")
+
+    def __init__(self, symlink):
+        self._symlink = symlink
+        self._original_object = symlink.symbolic_link.to_object
+
+    def __getattr__(self, key):
+        if key in self._not_inherited_attrs:
+            return getattr(self._symlink, key)
+        else:
+            return getattr(self._original_object, key)
+
 
 class SymlinkView(DefaultView):
-    pass
+    def __call__(self):
+        return self.context()
