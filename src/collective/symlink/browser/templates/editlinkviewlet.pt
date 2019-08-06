@@ -1,0 +1,6 @@
+<div>
+  <span i18n:translate="">This content is a copy, to modify the original content click on this button</span>
+  <span>
+    <a href="" class="btn btn-info" role="button" tal:attributes="href view/edit_link" i18n:translate="">Edit</a>
+  </span>
+</div>

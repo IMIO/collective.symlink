@@ -33,4 +33,13 @@
     factory=".namechooser.NormalizingNameChooserSymlink"
   />
 
+  <browser:viewlet
+      for="..content.symlink.ISymlink"
+      name="viewlet.symlink"
+      manager="plone.app.layout.viewlets.interfaces.IAboveContentTitle"
+      class=".editlinkviewlet.EditLinkViewlet"
+      permission="zope.Public"
+      layer="..interfaces.ICollectiveSymlinkLayer"
+      />
+
 </configure>
