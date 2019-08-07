@@ -11,4 +11,10 @@
       layer="..interfaces.ICollectiveSymlinkLayer"
       />
 
+  <subscriber
+    for=".symlink.ISymlink
+         zope.lifecycleevent.interfaces.IObjectModifiedEvent"
+    handler=".symlink.clear_caches"
+    />
+
 </configure>

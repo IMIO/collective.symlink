@@ -2,13 +2,19 @@
 
 from Acquisition import aq_base, aq_inner, aq_parent
 from collective.symlink import _
+from plone.app.iterate.interfaces import IIterateAware
+from plone.app.versioningbehavior.behaviors import IVersioningSupport
 from plone.dexterity.browser.view import DefaultView
 from plone.dexterity.content import Container
 from plone.folder.ordered import CMFOrderedBTreeFolderBase
 from plone.formwidget.contenttree import ObjPathSourceBinder
 from plone.supermodel import model
 from z3c.relationfield.schema import RelationChoice
-from zope.interface import implements
+from zope.interface import implementer
+from zope.interface.declarations import ObjectSpecificationDescriptor
+from zope.interface.declarations import getObjectSpecification
+from zope.interface.declarations import implementedBy
+from zope.interface.declarations import providedBy
 
 import types
 
@@ -21,10 +27,55 @@ class ISymlink(model.Schema):
     )
 
 
+class DelegatingSpecification(ObjectSpecificationDescriptor):
+    """
+    Get from collective.alias
+    A __providedBy__ decorator that returns the interfaces provided by
+    the object, plus those of the cached object.
+    """
+
+    def __get__(self, inst, cls=None):
+        # We're looking at a class - fall back on default
+        if inst is None:
+            return getObjectSpecification(cls)
+
+        # Find the cached value.
+        cache = getattr(inst, "_v__providedBy__", None)
+
+        # Find the data we need to know if our cache needs to be invalidated
+        provided = link_provides = getattr(inst, "__provides__", None)
+
+        # See if we have a valid cache, and if so return it
+        if cache is not None:
+            cached_mtime, cached_provides, cached_provided = cache
+
+            if inst._p_mtime == cached_mtime and link_provides is cached_provides:
+                return cached_provided
+
+        # If the instance doesn't have a __provides__ attribute, get the
+        # interfaces implied by the class as a starting point.
+        if provided is None:
+            provided = implementedBy(cls)
+
+        # Add the interfaces provided by the target
+        link = aq_base(inst._link)
+        if link is None:
+            return provided - IIterateAware - IVersioningSupport  # don't cache yet!
+
+        # Add the interfaces provided by the target, but ensure that some problematic
+        # interfaces are removed
+        provided += providedBy(link) - IIterateAware - IVersioningSupport
+
+        inst._v__providedBy__ = inst._p_mtime, link_provides, provided
+        return provided
+
+
+@implementer(ISymlink)
 class Symlink(Container):
-    implements(ISymlink)
 
     cmf_uid = None
+    _link_portal_type = None
+    __providedBy__ = DelegatingSpecification()
 
     def __call__(self):
         template = self._link.unrestrictedTraverse(self._link.getLayout())
@@ -32,17 +83,31 @@ class Symlink(Container):
         return template()
 
     def Title(self):
-        """Delegated title
-        """
         link = self._link
         if link is not None:
             return aq_inner(link).Title()
 
+    def Description(self):
+        link = self._link
+        if link is not None:
+            return aq_inner(link).Description()
+
+    @property
+    def portal_type(self):
+        link = self._link
+        if self._link is None:
+            return self.__getattribute__("_link_portal_type")
+        return aq_inner(link).portal_type
+
+    @portal_type.setter
+    def portal_type(self, value):
+        self._link_portal_type = value
+
     @property
     def _link(self):
-        if 'symbolic_link' not in self.__dict__:
+        if "symbolic_link" not in self.__dict__:
             return None
-        return self.__getattribute__('symbolic_link').to_object
+        return self.__getattribute__("symbolic_link").to_object
 
     def __getattr__(self, key):
         # Inspired by collective.alias
@@ -78,17 +143,35 @@ class Symlink(Container):
         return link_attr
 
     # Inspired by collective.alias
-
     def _getOb(self, id, default=_marker):
+        link = self._link
+        if link is not None:
+            obj = link._getOb(id, default)
+            if obj is default:
+                if default is _marker:
+                    raise KeyError(id)
+                return default
+            return aq_base(obj).__of__(self)
         return CMFOrderedBTreeFolderBase._getOb(self, id, default)
 
     def objectIds(self, spec=None, ordered=True):
+        link = self._link
+        if link is not None:
+            return link.objectIds(spec)
         return CMFOrderedBTreeFolderBase.objectIds(self, spec, ordered)
 
     def __getitem__(self, key):
+        link = self._link
+        if link is not None:
+            return link.__getitem__(key)
         return CMFOrderedBTreeFolderBase.__getitem__(self, key)
 
 
 class SymlinkView(DefaultView):
     def __call__(self):
         return self.context()
+
+
+def clear_caches(obj, event):
+    """If the link is modified, clear the _v_ attribute caches"""
+    obj._v__providedBy__ = None
