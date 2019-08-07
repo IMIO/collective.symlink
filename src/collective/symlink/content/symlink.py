@@ -4,6 +4,7 @@ from Acquisition import aq_base, aq_inner, aq_parent
 from collective.symlink import _
 from plone.dexterity.browser.view import DefaultView
 from plone.dexterity.content import Container
+from plone.folder.ordered import CMFOrderedBTreeFolderBase
 from plone.formwidget.contenttree import ObjPathSourceBinder
 from plone.supermodel import model
 from z3c.relationfield.schema import RelationChoice
@@ -75,6 +76,17 @@ class Symlink(Container):
             return types.MethodType(link_attr.im_func, self, type(self))
 
         return link_attr
+
+    # Inspired by collective.alias
+
+    def _getOb(self, id, default=_marker):
+        return CMFOrderedBTreeFolderBase._getOb(self, id, default)
+
+    def objectIds(self, spec=None, ordered=True):
+        return CMFOrderedBTreeFolderBase.objectIds(self, spec, ordered)
+
+    def __getitem__(self, key):
+        return CMFOrderedBTreeFolderBase.__getitem__(self, key)
 
 
 class SymlinkView(DefaultView):
