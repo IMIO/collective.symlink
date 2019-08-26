@@ -9,6 +9,8 @@ from plone.dexterity.content import Container
 from plone.folder.ordered import CMFOrderedBTreeFolderBase
 from plone.formwidget.contenttree import ObjPathSourceBinder
 from plone.supermodel import model
+from plone.uuid.interfaces import IAttributeUUID
+from plone.uuid.interfaces import IUUIDAware
 from z3c.relationfield.schema import RelationChoice
 from zope.interface import implementer
 from zope.interface.declarations import ObjectSpecificationDescriptor
@@ -70,7 +72,7 @@ class DelegatingSpecification(ObjectSpecificationDescriptor):
         return provided
 
 
-@implementer(ISymlink)
+@implementer(ISymlink, IUUIDAware, IAttributeUUID)
 class Symlink(Container):
 
     cmf_uid = None
@@ -117,6 +119,9 @@ class Symlink(Container):
             or key.endswith("_Permission")
         ):
             raise AttributeError(key)
+
+        if key == '_plone.uuid':
+            return super(Symlink, self).__getattr__(key)
 
         link = self._link
         if link is None:
