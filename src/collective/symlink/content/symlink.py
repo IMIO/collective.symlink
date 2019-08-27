@@ -12,11 +12,13 @@ from plone.supermodel import model
 from plone.uuid.interfaces import IAttributeUUID
 from plone.uuid.interfaces import IUUIDAware
 from z3c.relationfield.schema import RelationChoice
+from zope.component import ComponentLookupError
 from zope.interface import implementer
 from zope.interface.declarations import ObjectSpecificationDescriptor
 from zope.interface.declarations import getObjectSpecification
 from zope.interface.declarations import implementedBy
 from zope.interface.declarations import providedBy
+from zope.intid.interfaces import IIntIds
 
 import types
 
@@ -109,7 +111,12 @@ class Symlink(Container):
     def _link(self):
         if "symbolic_link" not in self.__dict__:
             return None
-        return self.__getattribute__("symbolic_link").to_object
+        try:
+            return self.__getattribute__("symbolic_link").to_object
+        except ComponentLookupError as e:
+            if getattr(e, 'args', [''])[0] == IIntIds:
+                return  # This happen when we try to remove the Plone object
+            raise e
 
     def __getattr__(self, key):
         # Inspired by collective.alias
