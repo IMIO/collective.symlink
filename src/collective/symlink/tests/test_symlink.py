@@ -14,7 +14,7 @@ class TestSymlink(unittest.TestCase):
 
     def tearDown(self):
         portal = api.portal.get()
-        for e in ("document", "link"):
+        for e in ("link", "document"):
             if e in portal:
                 api.content.delete(portal[e])
 

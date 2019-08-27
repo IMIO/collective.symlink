@@ -33,7 +33,7 @@ class TestSymlinkAdaptedContext(unittest.TestCase):
         )
 
     def tearDown(self):
-        for e in ("document", "folder"):
+        for e in ("folder", "document"):
             if e in self.portal:
                 api.content.delete(self.portal[e])
 
