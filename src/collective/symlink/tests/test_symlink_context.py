@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from collective.symlink.testing import COLLECTIVE_SYMLINK_ACCEPTANCE_TESTING
-from collective.symlink.content.symlink import AdaptedContext
 from plone import api
 from zope.component import getUtility
 from zope.intid.interfaces import IIntIds
@@ -43,8 +42,7 @@ class TestSymlinkAdaptedContext(unittest.TestCase):
 
     def test_url(self):
         self.assertEqual(
-            "http://localhost:55001/plone/folder/link",
-            self.link.absolute_url(),
+            "http://localhost:55001/plone/folder/link", self.link.absolute_url()
         )
 
     def test_parent(self):

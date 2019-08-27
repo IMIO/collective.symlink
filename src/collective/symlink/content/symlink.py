@@ -13,12 +13,15 @@ from plone.uuid.interfaces import IAttributeUUID
 from plone.uuid.interfaces import IUUIDAware
 from z3c.relationfield.schema import RelationChoice
 from zope.component import ComponentLookupError
+from zope.component import getUtility
 from zope.interface import implementer
 from zope.interface.declarations import ObjectSpecificationDescriptor
 from zope.interface.declarations import getObjectSpecification
 from zope.interface.declarations import implementedBy
 from zope.interface.declarations import providedBy
 from zope.intid.interfaces import IIntIds
+from zc.relation.interfaces import ICatalog
+from zope.security import checkPermission
 
 import types
 
@@ -114,7 +117,7 @@ class Symlink(Container):
         try:
             return self.__getattribute__("symbolic_link").to_object
         except ComponentLookupError as e:
-            if getattr(e, 'args', [''])[0] == IIntIds:
+            if getattr(e, "args", [""])[0] == IIntIds:
                 return  # This happen when we try to remove the Plone object
             raise e
 
@@ -127,7 +130,7 @@ class Symlink(Container):
         ):
             raise AttributeError(key)
 
-        if key == '_plone.uuid':
+        if key == "_plone.uuid":
             return super(Symlink, self).__getattr__(key)
 
         link = self._link
@@ -177,6 +180,21 @@ class Symlink(Container):
         if link is not None:
             return link.__getitem__(key)
         return CMFOrderedBTreeFolderBase.__getitem__(self, key)
+
+    def back_references(self):
+        """
+        Return back references from source object on specified attribute_name
+        """
+        catalog = getUtility(ICatalog)
+        intids = getUtility(IIntIds)
+        result = []
+        for rel in catalog.findRelations(
+            dict(to_id=intids.getId(aq_inner(self)), from_attribute="symbolic_link")
+        ):
+            obj = intids.queryObject(rel.from_id)
+            if obj is not None and checkPermission("zope2.View", obj):
+                result.append(obj)
+        return result
 
 
 class SymlinkView(DefaultView):
