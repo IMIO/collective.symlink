@@ -4,12 +4,20 @@
     i18n_domain="collective.symlink">
 
   <browser:page
-      for=".symlink.ISymlink"
-      name="view"
-      class=".symlink.SymlinkView"
-      permission="zope2.View"
-      layer="..interfaces.ICollectiveSymlinkLayer"
-      />
+    for=".symlink.ISymlink"
+    name="view"
+    class=".symlink.SymlinkView"
+    permission="zope2.View"
+    layer="..interfaces.ICollectiveSymlinkLayer"
+    />
+
+  <browser:page
+    for=".symlink.ISymlink"
+    name="edit"
+    class=".symlink.EditForm"
+    permission="cmf.ModifyPortalContent"
+    layer="..interfaces.ICollectiveSymlinkLayer"
+    />
 
   <subscriber
     for=".symlink.ISymlink

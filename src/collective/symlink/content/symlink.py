@@ -4,6 +4,7 @@ from Acquisition import aq_base, aq_inner, aq_parent
 from collective.symlink import _
 from plone.app.iterate.interfaces import IIterateAware
 from plone.app.versioningbehavior.behaviors import IVersioningSupport
+from plone.dexterity.browser import edit
 from plone.dexterity.browser.view import DefaultView
 from plone.dexterity.content import Container
 from plone.folder.ordered import CMFOrderedBTreeFolderBase
@@ -182,6 +183,20 @@ class Symlink(Container):
 class SymlinkView(DefaultView):
     def __call__(self):
         return self.context()
+
+
+class EditForm(edit.DefaultEditForm):
+    @property
+    def portal_type(self):
+        return self.context._link_portal_type
+
+    @portal_type.setter
+    def portal_type(self, value):
+        return  # Avoid override during update in plone.dexterity.browser.edit
+
+    @property
+    def additionalSchemata(self):
+        return []
 
 
 def clear_caches(obj, event):
