@@ -109,6 +109,21 @@ class Symlink(Container):
         self._link_portal_type = value
 
     @property
+    def workflow_history(self):
+        link = self._link
+        if self._link is None:
+            return None
+        return aq_inner(link).workflow_history
+
+    @workflow_history.setter
+    def workflow_history(self, value):
+        return
+
+    @workflow_history.deleter
+    def workflow_history(self):
+        return
+
+    @property
     def _link(self):
         if "symbolic_link" not in self.__dict__:
             return None
