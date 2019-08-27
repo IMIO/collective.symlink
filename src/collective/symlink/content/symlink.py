@@ -125,6 +125,9 @@ class Symlink(Container):
     def workflow_history(self):
         return
 
+    def allowedContentTypes(self):
+        return []
+
     @property
     def _link(self):
         if "symbolic_link" not in self.__dict__:
