@@ -19,6 +19,15 @@
     layer="..interfaces.ICollectiveSymlinkLayer"
     />
 
+  <browser:page
+    for=".symlink.ISymlink"
+    name="plone_context_state"
+    permission="zope.Public"
+    class=".symlink.SymlinkContextState"
+    allowed_interface="plone.app.layout.globals.interfaces.IContextState"
+    layer="..interfaces.ICollectiveSymlinkLayer"
+    />
+
   <subscriber
     for=".symlink.ISymlink
          zope.lifecycleevent.interfaces.IObjectModifiedEvent"

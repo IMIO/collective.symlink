@@ -3,6 +3,7 @@
 from Acquisition import aq_base, aq_inner, aq_parent
 from collective.symlink import _
 from plone.app.iterate.interfaces import IIterateAware
+from plone.app.layout.globals.context import ContextState
 from plone.app.versioningbehavior.behaviors import IVersioningSupport
 from plone.dexterity.browser import edit
 from plone.dexterity.browser.view import DefaultView
@@ -213,6 +214,11 @@ class EditForm(edit.DefaultEditForm):
     @property
     def additionalSchemata(self):
         return []
+
+
+class SymlinkContextState(ContextState):
+    def workflow_state(self):
+        return None
 
 
 def clear_caches(obj, event):
