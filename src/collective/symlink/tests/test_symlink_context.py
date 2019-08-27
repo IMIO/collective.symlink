@@ -45,6 +45,19 @@ class TestSymlinkAdaptedContext(unittest.TestCase):
             "http://localhost:55001/plone/folder/link", self.link.absolute_url()
         )
 
+    def test_title(self):
+        self.assertEqual("Title", self.link.Title())
+
+    def test_description(self):
+        self.assertEqual("Description", self.link.Description())
+
+    def test_portal_type(self):
+        self.assertEqual("symlink", self.link._link_portal_type)
+        self.assertEqual("Document", self.link.portal_type)
+
+    def test_allowed_content_types(self):
+        self.assertEqual([], self.link.allowedContentTypes())
+
     def test_parent(self):
         from Acquisition import aq_parent
 
