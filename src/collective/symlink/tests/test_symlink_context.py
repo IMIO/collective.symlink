@@ -9,6 +9,14 @@ from z3c.relationfield import RelationValue
 import unittest
 
 
+def test_foo():
+    return "foo"
+
+
+def test_bar():
+    return "bar"
+
+
 class TestSymlinkAdaptedContext(unittest.TestCase):
     layer = COLLECTIVE_SYMLINK_ACCEPTANCE_TESTING
 
@@ -21,7 +29,10 @@ class TestSymlinkAdaptedContext(unittest.TestCase):
             title="Title",
             description="Description",
             container=self.portal,
+            test="test",
+            foo="test",
         )
+        self.base.test_method = test_foo
         self.folder = api.content.create(
             type="Folder", id="folder", container=self.portal
         )
@@ -30,7 +41,9 @@ class TestSymlinkAdaptedContext(unittest.TestCase):
             id="link",
             symbolic_link=RelationValue(intids.getId(self.base)),
             container=self.folder,
+            foo="bar",
         )
+        self.link.test_method = test_bar
 
     def tearDown(self):
         for e in ("folder", "document"):
@@ -63,3 +76,9 @@ class TestSymlinkAdaptedContext(unittest.TestCase):
 
         self.assertTrue(self.link.__parent__ == self.folder)
         self.assertTrue(aq_parent(self.link) == self.folder)
+
+    def test_attribute_inheritance(self):
+        self.assertEqual("bar", self.link.foo)
+        self.assertEqual("test", self.link.test)
+        self.assertEqual("bar", self.link.test_method())
+        self.assertEqual("foo", self.base.test_method())
