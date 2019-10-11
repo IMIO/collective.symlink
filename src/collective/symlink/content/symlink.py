@@ -80,7 +80,7 @@ class DelegatingSpecification(ObjectSpecificationDescriptor):
 class Symlink(Container):
 
     cmf_uid = None
-    cb_dataValid = False  # This hide the paste button
+    cb_dataValid = lambda s: False  # This hide the paste button
     _link_portal_type = None
     __providedBy__ = DelegatingSpecification()
 
