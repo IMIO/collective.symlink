@@ -101,7 +101,8 @@ class Symlink(Container):
 
     @property
     def title(self):
-        # we have to define a property because self.title works and returns '', even if there is no title attribute
+        # we have to define a property because self.title always works for a dexterity object and returns '',
+        # even if there is no title attribute. => self.title don't pass in __getattr__
         if self._link is None:
             return u''
         return aq_inner(self._link).title
@@ -110,10 +111,13 @@ class Symlink(Container):
     def title(self, value):
         # title attribute is set to '' in Products/CMFCore/PortalFolder.py __init__
         # a set attribute is not gotten from the linked object (don't pass in __getattr__) !
+        # => we don't set the title
         pass
 
     @property
     def description(self):
+        # we have to define a property because self.description always works for a dexterity object and returns '',
+        # even if there is no title attribute. => self.description don't pass in __getattr__
         if self._link is None:
             return u''
         return aq_inner(self._link).description
@@ -122,6 +126,7 @@ class Symlink(Container):
     def description(self, value):
         # description attribute is set to '' in Products/CMFCore/PortalFolder.py __init__
         # a set attribute is not gotten from the linked object (don't pass in __getattr__) !
+        # => we don't set the description
         pass
 
     @property
