@@ -100,6 +100,31 @@ class Symlink(Container):
             return aq_inner(link).Description()
 
     @property
+    def title(self):
+        # we have to define a property because self.title works and returns '', even if there is no title attribute
+        if self._link is None:
+            return u''
+        return aq_inner(self._link).title
+
+    @title.setter
+    def title(self, value):
+        # title attribute is set to '' in Products/CMFCore/PortalFolder.py __init__
+        # a set attribute is not gotten from the linked object (don't pass in __getattr__) !
+        pass
+
+    @property
+    def description(self):
+        if self._link is None:
+            return u''
+        return aq_inner(self._link).description
+
+    @description.setter
+    def description(self, value):
+        # description attribute is set to '' in Products/CMFCore/PortalFolder.py __init__
+        # a set attribute is not gotten from the linked object (don't pass in __getattr__) !
+        pass
+
+    @property
     def portal_type(self):
         link = self._link
         if self._link is None:
@@ -140,6 +165,7 @@ class Symlink(Container):
             raise e
 
     def __getattr__(self, key):
+        """ Pass only here if key attribute is not set on symlink ! """
         # Inspired by collective.alias
         if (
             key.startswith("_v_")
