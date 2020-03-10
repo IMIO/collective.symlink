@@ -2,9 +2,11 @@
 
 from collective.symlink.testing import COLLECTIVE_SYMLINK_ACCEPTANCE_TESTING
 from plone import api
-from zope.component import getUtility
-from zope.intid.interfaces import IIntIds
 from z3c.relationfield import RelationValue
+from zope.component import getUtility
+from zope.event import notify
+from zope.intid.interfaces import IIntIds
+from zope.lifecycleevent import ObjectModifiedEvent
 
 import unittest
 
@@ -82,3 +84,26 @@ class TestSymlinkAdaptedContext(unittest.TestCase):
         self.assertEqual("test", self.link.test)
         self.assertEqual("bar", self.link.test_method())
         self.assertEqual("foo", self.base.test_method())
+
+    def test_indexed_values(self):
+        self.assertEqual("Title", self.base.title)
+        self.assertEqual("Description", self.base.description)
+
+        brains = api.content.find(
+            context=self.portal, portal_type="Document"
+        )
+        self.assertEqual(2, len(brains))
+        for b in brains:
+            self.assertEqual("Title", b.Title)
+            self.assertEqual("Description", b.Description)
+
+        self.base.title = "New Title"
+        self.base.description = "New Description"
+        notify(ObjectModifiedEvent(self.base))
+        brains = api.content.find(
+            context=self.portal, portal_type="Document"
+        )
+        self.assertEqual(2, len(brains))
+        for b in brains:
+            self.assertEqual("New Title", b.Title)
+            self.assertEqual("New Description", b.Description)

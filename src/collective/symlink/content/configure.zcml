@@ -28,10 +28,17 @@
     layer="..interfaces.ICollectiveSymlinkLayer"
     />
 
+  <!-- events subscribers -->
   <subscriber
     for=".symlink.ISymlink
          zope.lifecycleevent.interfaces.IObjectModifiedEvent"
-    handler=".symlink.clear_caches"
+    handler=".subscriber.clear_caches"
+    />
+
+  <subscriber
+    for="plone.dexterity.interfaces.IDexterityItem
+         zope.lifecycleevent.interfaces.IObjectModifiedEvent"
+    handler=".subscriber.element_modified"
     />
 
 </configure>

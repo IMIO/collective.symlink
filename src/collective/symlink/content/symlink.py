@@ -253,8 +253,3 @@ class EditForm(edit.DefaultEditForm):
 class SymlinkContextState(ContextState):
     def workflow_state(self):
         return None
-
-
-def clear_caches(obj, event):
-    """If the link is modified, clear the _v_ attribute caches"""
-    obj._v__providedBy__ = None
