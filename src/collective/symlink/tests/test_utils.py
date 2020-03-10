@@ -10,8 +10,9 @@ from z3c.relationfield import RelationValue
 import unittest
 
 
-class TestSymlink(unittest.TestCase):
+class TestUtils(unittest.TestCase):
     layer = COLLECTIVE_SYMLINK_ACCEPTANCE_TESTING
+    maxDiff = None
 
     def tearDown(self):
         portal = api.portal.get()
@@ -23,12 +24,36 @@ class TestSymlink(unittest.TestCase):
         portal = api.portal.get()
         intids = getUtility(IIntIds)
         folder = api.content.create(type="Folder", id="folder", container=portal)
-        doc = api.content.create(type="Document", id="document", title="Title", description="Description",
-                                 container=folder)
-        link = api.content.create(type="symlink", id="link", symbolic_link=RelationValue(intids.getId(folder)),
-                                  container=portal)
-        self.assertTupleEqual(is_linked_object(doc), ('', None, None, ''))
-        self.assertTupleEqual(is_linked_object(folder), ('', None, None, ''))
-        self.assertTupleEqual(is_linked_object(link), ('symlink', link, folder, ''))
-        self.assertTupleEqual(is_linked_object(link.document), ('symlink', link, folder, 'document'))
-        self.assertTupleEqual(is_linked_object(link['document']), ('symlink', link, folder, 'document'))
+        doc = api.content.create(
+            type="Document",
+            id="document",
+            title="Title",
+            description="Description",
+            container=folder,
+        )
+        link = api.content.create(
+            type="symlink",
+            id="link",
+            symbolic_link=RelationValue(intids.getId(folder)),
+            container=portal,
+        )
+        result = []
+        result.append(is_linked_object(doc))
+        result.append(is_linked_object(folder))
+        result.append(is_linked_object(link))
+        # This return the document related to the link : /plone/link/document
+        result.append(is_linked_object(link.document))
+        # This return the document related to the original linked folder :
+        # /plone/folder/document
+        result.append(is_linked_object(link["document"]))
+        result = [
+            (l, s and s.UID() or s, o and o.UID() or o, r) for l, s, o, r in result
+        ]
+        expected_result = [
+            ("", None, None, ""),
+            ("", None, None, ""),
+            ("symlink", link.UID(), folder.UID(), ""),
+            ("symlink", link.UID(), folder.UID(), "document"),
+            ("", None, None, ""),
+        ]
+        self.assertEqual(expected_result, result)
