@@ -227,7 +227,10 @@ class Symlink(Container):
     def __getitem__(self, key):
         link = self._link
         if link is not None:
-            return link.__getitem__(key)
+            link_item = link.__getitem__(key)
+            if aq_parent(link_item) is link:
+                link_item = aq_base(link_item).__of__(self)
+            return link_item
         return CMFOrderedBTreeFolderBase.__getitem__(self, key)
 
 

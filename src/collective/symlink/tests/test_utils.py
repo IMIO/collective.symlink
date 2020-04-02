@@ -43,8 +43,7 @@ class TestUtils(unittest.TestCase):
         result.append(is_linked_object(link))
         # This return the document related to the link : /plone/link/document
         result.append(is_linked_object(link.document))
-        # This return the document related to the original linked folder :
-        # /plone/folder/document
+        # This must return the document related to the link : /plone/folder/document
         result.append(is_linked_object(link["document"]))
         result = [
             (l, s and s.UID() or s, o and o.UID() or o, r) for l, s, o, r in result
@@ -54,6 +53,6 @@ class TestUtils(unittest.TestCase):
             ("", None, None, ""),
             ("symlink", link.UID(), folder.UID(), ""),
             ("symlink", link.UID(), folder.UID(), "document"),
-            ("", None, None, ""),
+            ("symlink", link.UID(), folder.UID(), "document"),
         ]
         self.assertEqual(expected_result, result)
