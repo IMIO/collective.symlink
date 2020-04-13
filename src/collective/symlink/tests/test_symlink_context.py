@@ -57,7 +57,7 @@ class TestSymlinkAdaptedContext(unittest.TestCase):
 
     def test_url(self):
         self.assertEqual(
-            "http://localhost:55001/plone/folder/link", self.link.absolute_url()
+            "/plone/folder/link", '/'.join(self.link.getPhysicalPath())
         )
 
     def test_title(self):
