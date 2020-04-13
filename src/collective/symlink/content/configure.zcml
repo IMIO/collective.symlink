@@ -36,7 +36,7 @@
     />
 
   <subscriber
-    for="collective.symlink.interfaces.ISymlinkable
+    for="plone.dexterity.interfaces.IDexterityContent
          zope.lifecycleevent.interfaces.IObjectModifiedEvent"
     handler=".subscriber.element_modified"
     />
