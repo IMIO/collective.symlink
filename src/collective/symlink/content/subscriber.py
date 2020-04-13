@@ -12,9 +12,11 @@ def clear_caches(obj, event):
 
 def element_modified(obj, event):
     intids = getUtility(IIntIds)
-    catalog = getUtility(ICatalog)
-    links = catalog.findRelations(
-        {"to_id": intids.queryId(obj), "from_attribute": "symbolic_link"}
-    )
-    for link in links:
-        link.from_object.reindexObject()
+    to_id = intids.queryId(obj)
+    if to_id:
+        catalog = getUtility(ICatalog)
+        links = catalog.findRelations(
+            {"to_id": to_id, "from_attribute": "symbolic_link"}
+        )
+        for link in links:
+            link.from_object.reindexObject()
