@@ -14,7 +14,7 @@ def element_modified(obj, event):
     intids = getUtility(IIntIds)
     catalog = getUtility(ICatalog)
     links = catalog.findRelations(
-        {"to_id": intids.getId(obj), "from_attribute": "symbolic_link"}
+        {"to_id": intids.queryId(obj), "from_attribute": "symbolic_link"}
     )
     for link in links:
         link.from_object.reindexObject()
