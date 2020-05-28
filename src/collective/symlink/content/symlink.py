@@ -85,7 +85,10 @@ class Symlink(Container):
     __providedBy__ = DelegatingSpecification()
 
     def __call__(self):
-        template = self._link.unrestrictedTraverse(self._link.getLayout())
+        original = self._link
+        if hasattr(original, '_link'):
+            original = original._link
+        template = original.unrestrictedTraverse(original.getLayout())
         template.context = self
         return template()
 
