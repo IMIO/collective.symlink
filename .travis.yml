@@ -1,3 +1,4 @@
+dist: bionic
 language: python
 sudo: false
 cache:
@@ -27,3 +28,5 @@ after_success:
   - bin/python -m coverage.pickle2json
   - pip install coveralls
   - coveralls
+services:
+  - xvfb
