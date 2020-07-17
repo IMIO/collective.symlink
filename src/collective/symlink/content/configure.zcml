@@ -41,4 +41,10 @@
     handler=".subscriber.element_modified"
     />
 
+    <subscriber
+        for=".symlink.ISymlink
+             zope.container.interfaces.IObjectAddedEvent"
+        handler=".subscriber.element_added"
+     />
+
 </configure>
