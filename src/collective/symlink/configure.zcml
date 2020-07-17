@@ -41,4 +41,7 @@
 
   <!-- -*- extra stuff goes here -*- -->
 
+  <adapter name="symlink_status" factory=".indexes.symlink_status_index" />
+
+
 </configure>
