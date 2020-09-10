@@ -40,7 +40,6 @@ class TestSymlinkIndexing(unittest.TestCase):
             description="Description",
             container=self.folder,
         )
-        notify(ObjectModifiedEvent(self.document_after))
 
     def tearDown(self):
         for e in ("link", "folder"):

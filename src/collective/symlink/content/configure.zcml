@@ -41,10 +41,10 @@
     handler=".subscriber.element_modified"
     />
 
-    <subscriber
-        for=".symlink.ISymlink
-             zope.container.interfaces.IObjectAddedEvent"
-        handler=".subscriber.element_added"
-     />
+  <subscriber
+    for="plone.dexterity.interfaces.IDexterityContent
+         zope.lifecycleevent.interfaces.IObjectCreatedEvent"
+    handler=".subscriber.element_created"
+    />
 
 </configure>

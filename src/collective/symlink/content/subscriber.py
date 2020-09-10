@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from Acquisition import aq_parent
 from Products.CMFPlone.interfaces import IPloneSiteRoot
+from plone.dexterity.interfaces import IDexterityContainer
 from zc.relation.interfaces import ICatalog
 from zope.component import getUtility
+from zope.container.interfaces import IContainerModifiedEvent
 from zope.intid.interfaces import IIntIds
 
 
@@ -12,6 +14,11 @@ def clear_caches(obj, event):
 
 
 def element_modified(obj, event):
+    if IContainerModifiedEvent.providedBy(event):
+        for element in _get_children(obj):
+            if getattr(element, "__created", False) is True:
+                delattr(element, "__created")
+                element_modified(element, None)
     elements = []
     link_objects = []
     for obj in iterate_until_root(obj):
@@ -57,4 +64,18 @@ def iterate_until_root(obj):
     while obj and not IPloneSiteRoot.providedBy(obj):
         result.append(obj)
         obj = aq_parent(obj)
+    return result
+
+
+def element_created(obj, event):
+    obj.__created = True
+
+
+def _get_children(obj):
+    result = []
+    if not IDexterityContainer.providedBy(obj):
+        return result
+    for child in obj.listFolderContents():
+        result.append(child)
+        result.extend(_get_children(child))
     return result
