@@ -92,3 +92,16 @@ class TestSymlinkIndexing(unittest.TestCase):
             ["document-before", "document-before", "document-after", "document-after"],
             [b.id for b in brains],
         )
+
+    def test_indexing_symlink_item_uid(self):
+        """Ensure that the symlink does not have the same UID as the original item"""
+        brains = api.content.find(context=self.portal, Title="Folder")
+        self.assertEqual(2, len(brains))
+        self.assertEqual(2, len(set([b.UID for b in brains])))
+
+    def test_indexing_symlink_subitem_uid(self):
+        """Ensure that the symlink subtimes does not have the same UID that can lead
+        to errors in multiple situations"""
+        brains = api.content.find(context=self.portal, Title="Title")
+        self.assertEqual(4, len(brains))
+        self.assertEqual(4, len(set([b.UID for b in brains])))
