@@ -160,14 +160,17 @@ class Symlink(Container):
 
     @property
     def _link(self):
-        if "symbolic_link" not in self.__dict__:
+        link = self
+        if "symbolic_link" not in link.__dict__:
             return None
-        try:
-            return self.__getattribute__("symbolic_link").to_object
-        except ComponentLookupError as e:
-            if getattr(e, "args", [""])[0] == IIntIds:
-                return  # This happen when we try to remove the Plone object
-            raise e
+        while "symbolic_link" in link.__dict__:
+            try:
+                link = link.__getattribute__("symbolic_link").to_object
+            except ComponentLookupError as e:
+                if getattr(e, "args", [""])[0] == IIntIds:
+                    return  # This happen when we try to remove the Plone object
+                raise e
+        return link
 
     def __getattr__(self, key):
         """ Pass only here if key attribute is not set on symlink ! """
