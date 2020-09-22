@@ -6,6 +6,7 @@ from zc.relation.interfaces import ICatalog
 from zope.component import getUtility
 from zope.container.interfaces import IContainerModifiedEvent
 from zope.intid.interfaces import IIntIds
+from collective.symlink.content.symlink import SymlinkSubItem
 
 
 def clear_caches(obj, event):
@@ -52,7 +53,7 @@ def reindex_symlink(link_objects, elements):
             while idx < len(elements):
                 sub_object = getattr(sub_object, elements[idx])
                 idx += 1
-            to_reindex.append(sub_object)
+            to_reindex.append(SymlinkSubItem(sub_object).__of__(sub_object.aq_parent))
     for obj in to_reindex:
         obj.reindexObject()
 

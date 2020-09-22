@@ -13,8 +13,11 @@ from plone.formwidget.contenttree import ObjPathSourceBinder
 from plone.supermodel import model
 from plone.uuid.interfaces import IAttributeUUID
 from plone.uuid.interfaces import IUUIDAware
+from plone.uuid.interfaces import IUUIDGenerator
 from z3c.relationfield.schema import RelationChoice
 from zope.component import ComponentLookupError
+from zope.component import queryUtility
+from zope.interface import Interface
 from zope.interface import implementer
 from zope.interface.declarations import ObjectSpecificationDescriptor
 from zope.interface.declarations import getObjectSpecification
@@ -25,6 +28,10 @@ from zope.intid.interfaces import IIntIds
 import types
 
 _marker = object()
+
+
+class ISymlinkMarker(Interface):
+    """ Marker interface for Symlink content types """
 
 
 class ISymlink(model.Schema):
@@ -71,9 +78,119 @@ class DelegatingSpecification(ObjectSpecificationDescriptor):
         # Add the interfaces provided by the target, but ensure that some problematic
         # interfaces are removed
         provided += providedBy(link) - IIterateAware - IVersioningSupport
+        provided += ISymlinkMarker
 
         inst._v__providedBy__ = inst._p_mtime, link_provides, provided
         return provided
+
+
+@implementer(ISymlinkMarker)
+class SymlinkSubItem(Container):
+
+    cmf_uid = None
+    __providedBy__ = DelegatingSpecification()
+
+    def __init__(self, context):
+        self._context = context
+
+    @property
+    def id(self):
+        return self._context.getId()
+
+    def Title(self):
+        return aq_inner(self._context).Title()
+
+    def Description(self):
+        return aq_inner(self._context).Description()
+
+    @property
+    def title(self):
+        # we have to define a property because self.title always works for a dexterity object and returns '',
+        # even if there is no title attribute. => self.title don't pass in __getattr__
+        return aq_inner(self._context).title
+
+    @title.setter
+    def title(self, value):
+        # title attribute is set to '' in Products/CMFCore/PortalFolder.py __init__
+        # a set attribute is not gotten from the linked object (don't pass in __getattr__) !
+        # => we don't set the title
+        pass
+
+    @property
+    def description(self):
+        # we have to define a property because self.description always works for a dexterity object and returns '',
+        # even if there is no title attribute. => self.description don't pass in __getattr__
+        return aq_inner(self._context).description
+
+    @description.setter
+    def description(self, value):
+        # description attribute is set to '' in Products/CMFCore/PortalFolder.py __init__
+        # a set attribute is not gotten from the linked object (don't pass in __getattr__) !
+        # => we don't set the description
+        pass
+
+    @property
+    def workflow_history(self):
+        return aq_inner(self._context).workflow_history
+
+    @workflow_history.setter
+    def workflow_history(self, value):
+        return
+
+    @workflow_history.deleter
+    def workflow_history(self):
+        return
+
+    def allowedContentTypes(self):
+        return []
+
+    def __getattr__(self, key):
+        """ Pass only here if key attribute is not set on symlink ! """
+        # Inspired by collective.alias
+        if (
+            key.startswith("_v_")
+            or key.startswith("_p_")
+            or key.endswith("_Permission")
+        ):
+            raise AttributeError(key)
+
+        if key == "_plone.uuid":
+            # XXX Must be adapted to find the correct parent (link)
+            link = aq_inner(self._context).aq_parent
+            uuids = getattr(link, "_link.uuids", None)
+            path = self._context.getPhysicalPath()
+            if uuids is None:
+                uuids = {}
+                setattr(link, "_link.uuids", uuids)
+            if path not in uuids:
+                uuids[path] = queryUtility(IUUIDGenerator)()
+            return uuids[path]
+
+        context = aq_inner(self._context)
+
+        if not hasattr(aq_base(context), key):
+            return super(SymlinkSubItem, self).__getattr__(key)
+
+        context_attr = getattr(context, key, _marker)
+
+        if context_attr is _marker:
+            return super(SymlinkSubItem, self).__getattr__(key)
+
+        # if this is an acquisition wrapped object, re-wrap it in the alias
+        if aq_parent(context_attr) is context:
+            context_attr = aq_base(context_attr).__of__(self)
+
+        # if it is a bound method, re-bind it so that im_self is the alias
+        if isinstance(context_attr, types.MethodType):
+            return types.MethodType(context_attr.im_func, self, type(self))
+
+        return context_attr
+
+    def objectIds(self, spec=None, ordered=True):
+        return self._context.objectIds(spec)
+
+    def __getitem__(self, key):
+        return self._context.__getitem__(key)
 
 
 @implementer(ISymlink, IUUIDAware, IAttributeUUID)
@@ -215,7 +332,7 @@ class Symlink(Container):
                 if default is _marker:
                     raise KeyError(id)
                 return default
-            return aq_base(obj).__of__(self)
+            return SymlinkSubItem(aq_base(obj).__of__(self)).__of__(self)
         return CMFOrderedBTreeFolderBase._getOb(self, id, default)
 
     def objectIds(self, spec=None, ordered=True):
@@ -227,7 +344,7 @@ class Symlink(Container):
     def __getitem__(self, key):
         link = self._link
         if link is not None:
-            return link.__getitem__(key)
+            return SymlinkSubItem(link.__getitem__(key)).__of__(self)
         return CMFOrderedBTreeFolderBase.__getitem__(self, key)
 
 
