@@ -3,6 +3,10 @@
 from Acquisition import aq_inner  # noqa
 from Acquisition import aq_parent  # noqa
 from Products.CMFPlone.utils import base_hasattr
+from zc.relation.interfaces import ICatalog
+
+from zope.component import getUtility
+from zope.intid import IIntIds
 
 
 def is_linked_object(obj):
@@ -21,3 +25,20 @@ def is_linked_object(obj):
             break
         parent = aq_parent(aq_inner(parent))
     return tuple(ret)
+
+
+def query_links_to_object(obj):
+    """query all links pointing to a given object.
+    :param obj:
+    :return: list of links
+    """
+    intids = getUtility(IIntIds)
+    to_id = intids.queryId(obj)
+    links = []
+    if to_id:
+        catalog = getUtility(ICatalog)
+        links = catalog.findRelations(
+            {"to_id": to_id, "from_attribute": "symbolic_link"}
+        )
+    return links
+
