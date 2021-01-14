@@ -50,6 +50,7 @@ def reindex_symlink(link_objects, elements):
         for link_object in link_objects:
             idx = 0
             sub_object = link_object
+            elements.reverse()
             while idx < len(elements):
                 sub_object = getattr(sub_object, elements[idx])
                 idx += 1
