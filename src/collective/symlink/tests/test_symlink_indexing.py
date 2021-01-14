@@ -40,6 +40,20 @@ class TestSymlinkIndexing(unittest.TestCase):
             description="Description",
             container=self.folder,
         )
+        self.subfolder = api.content.create(
+            type="Folder",
+            id="subfolder",
+            title="SubFolder",
+            description="Description",
+            container=self.folder,
+        )
+        self.subfolder_item = api.content.create(
+            type="Document",
+            id="subfolder-document",
+            title="Subfolder Item",
+            description="Description",
+            container=self.subfolder,
+        )
 
     def tearDown(self):
         for e in ("link", "folder"):
@@ -100,8 +114,13 @@ class TestSymlinkIndexing(unittest.TestCase):
         self.assertEqual(2, len(set([b.UID for b in brains])))
 
     def test_indexing_symlink_subitem_uid(self):
-        """Ensure that the symlink subtimes does not have the same UID that can lead
+        """Ensure that the symlink subitems does not have the same UID that can lead
         to errors in multiple situations"""
         brains = api.content.find(context=self.portal, Title="Title")
         self.assertEqual(4, len(brains))
         self.assertEqual(4, len(set([b.UID for b in brains])))
+
+    def test_indexing_symlink_subsubitem_uid(self):
+        brains = api.content.find(context=self.portal, Title="Subfolder Item")
+        self.assertEqual(2, len(brains))
+        self.assertEqual(2, len(set([b.UID for b in brains])))
