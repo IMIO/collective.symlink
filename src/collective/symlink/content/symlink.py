@@ -157,6 +157,8 @@ class SymlinkSubItem(Container):
         if key == "_plone.uuid":
             # XXX Must be adapted to find the correct parent (link)
             link = aq_inner(self._context).aq_parent
+            while not ISymlink.providedBy(link):
+                link = aq_inner(link).aq_parent
             uuids = getattr(link, "_link.uuids", None)
             path = self._context.getPhysicalPath()
             if uuids is None:
@@ -191,6 +193,14 @@ class SymlinkSubItem(Container):
 
     def __getitem__(self, key):
         return self._context.__getitem__(key)
+
+    def _getOb(self, id, default=_marker):
+        obj = self._context._getOb(id, default)
+        if obj is default:
+            if default is _marker:
+                raise KeyError(id)
+            return default
+        return SymlinkSubItem(aq_base(obj).__of__(self)).__of__(self)
 
 
 @implementer(ISymlink, IUUIDAware, IAttributeUUID)
