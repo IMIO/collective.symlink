@@ -231,7 +231,11 @@ class SymlinkSubItem(Container):
 
         # if this is an acquisition wrapped object, re-wrap it in the alias
         if aq_parent(context_attr) is context:
-            context_attr = aq_base(context_attr).__of__(self)
+            # Try to access to subitem
+            if key in context.keys():
+                context_attr = SymlinkSubItem(context_attr).__of__(self)
+            else:
+                context_attr = aq_base(context_attr).__of__(self)
 
         # if it is a bound method, re-bind it so that im_self is the alias
         if isinstance(context_attr, types.MethodType):
@@ -243,7 +247,7 @@ class SymlinkSubItem(Container):
         return self._context.objectIds(spec)
 
     def __getitem__(self, key):
-        return self._context.__getitem__(key)
+        return SymlinkSubItem(self._context.__getitem__(key)).__of__(self)
 
     def _getOb(self, id, default=_marker):
         obj = self._context._getOb(id, default)
@@ -380,6 +384,9 @@ class Symlink(Container):
         # if this is an acquisition wrapped object, re-wrap it in the alias
         if aq_parent(link_attr) is link:
             link_attr = aq_base(link_attr).__of__(self)
+            # Try to access to subitem
+            if key in link.keys():
+                link_attr = SymlinkSubItem(link_attr).__of__(self)
 
         # if it is a bound method, re-bind it so that im_self is the alias
         if isinstance(link_attr, types.MethodType):
