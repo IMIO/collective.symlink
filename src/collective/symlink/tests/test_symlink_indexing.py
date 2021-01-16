@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from collective.symlink.content.symlink import SymlinkSubItem
+from collective.symlink.content.symlink import Symlink
 from collective.symlink.testing import COLLECTIVE_SYMLINK_ACCEPTANCE_TESTING
 from plone import api
 from z3c.relationfield import RelationValue
@@ -119,8 +121,70 @@ class TestSymlinkIndexing(unittest.TestCase):
         brains = api.content.find(context=self.portal, Title="Title")
         self.assertEqual(4, len(brains))
         self.assertEqual(4, len(set([b.UID for b in brains])))
+        self.assertEqual(4, len(set([b.getObject().UID() for b in brains])))
 
     def test_indexing_symlink_subsubitem_uid(self):
         brains = api.content.find(context=self.portal, Title="Subfolder Item")
         self.assertEqual(2, len(brains))
         self.assertEqual(2, len(set([b.UID for b in brains])))
+        self.assertEqual(2, len(set([b.getObject().UID() for b in brains])))
+
+    def test_indexing_symlink_subitem_path(self):
+        brains = api.content.find(context=self.portal, Title="Title")
+        self.assertEqual(4, len(brains))
+        paths = [
+            "/plone/folder/document-after",
+            "/plone/folder/document-before",
+            "/plone/link/document-after",
+            "/plone/link/document-before",
+        ]
+        self.assertEqual(paths, sorted([b.getPath() for b in brains]))
+
+    def test_indexing_symlink_subsubitem_path(self):
+        brains = api.content.find(context=self.portal, Title="Subfolder Item")
+        self.assertEqual(2, len(brains))
+        paths = [
+            "/plone/folder/subfolder/subfolder-document",
+            "/plone/link/subfolder/subfolder-document",
+        ]
+        self.assertEqual(paths, sorted([b.getPath() for b in brains]))
+
+    def test_indexing_symlink_subitem_portal_type(self):
+        brains = api.content.find(context=self.portal, Title="Title")
+        self.assertEqual(4, len(brains))
+        self.assertEqual(
+            ["Document"], list(set([b.getObject().portal_type for b in brains]))
+        )
+        self.assertEqual(["Document"], list(set([b.portal_type for b in brains])))
+
+    def test_indexing_symlink_subsubitem_portal_type(self):
+        brains = api.content.find(context=self.portal, Title="Subfolder Item")
+        self.assertEqual(2, len(brains))
+        self.assertEqual(["Document"], list(set([b.portal_type for b in brains])))
+
+    def test_traversing_subitem_types(self):
+        obj = self.folder
+        self.assertFalse(isinstance(obj, SymlinkSubItem))
+        self.assertFalse(isinstance(obj, Symlink))
+        link = obj = self.portal.unrestrictedTraverse("link")
+        self.assertFalse(isinstance(obj, SymlinkSubItem))
+        self.assertTrue(isinstance(obj, Symlink))
+        obj = obj.unrestrictedTraverse("document-after")
+        self.assertTrue(isinstance(obj, SymlinkSubItem))
+        self.assertFalse(isinstance(obj, Symlink))
+        obj = link.unrestrictedTraverse("subfolder")
+        self.assertTrue(isinstance(obj, SymlinkSubItem))
+        self.assertFalse(isinstance(obj, Symlink))
+        obj = obj.unrestrictedTraverse("subfolder-document")
+        self.assertTrue(isinstance(obj, SymlinkSubItem))
+        self.assertFalse(isinstance(obj, Symlink))
+
+    def test_traversing_link_access(self):
+        link = self.portal["link"]
+        self.assertTrue("document-after" in link)
+        self.assertFalse("foo" in link)
+
+    def test_traversing_subsubitem_access(self):
+        subsubitem = self.portal["link"]["subfolder"]
+        self.assertTrue("subfolder-document" in subsubitem)
+        self.assertFalse("foo" in subsubitem)
