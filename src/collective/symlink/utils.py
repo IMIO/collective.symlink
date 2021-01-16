@@ -15,13 +15,15 @@ def is_linked_object(obj):
     :type obj: object
     :returns: tuple with link, symlink object, original object, relative_path
     """
-    ret = ['', None, None, '']
+    ret = ["", None, None, ""]
     parent = obj
-    while not parent.portal_type == 'Plone Site':
-        if base_hasattr(parent, '_link_portal_type'):
-            ret = [parent._link_portal_type, parent, parent._link, '']  # noqa
+    while not parent.portal_type == "Plone Site":
+        if base_hasattr(parent, "_link_portal_type"):
+            ret = [parent._link_portal_type, parent, parent._link, ""]  # noqa
             if obj != parent:
-                ret[3] = '/'.join(obj.getPhysicalPath()[len(parent.getPhysicalPath()):])
+                ret[3] = "/".join(
+                    obj.getPhysicalPath()[len(parent.getPhysicalPath()) :]
+                )
             break
         parent = aq_parent(aq_inner(parent))
     return tuple(ret)
@@ -41,4 +43,3 @@ def query_links_to_object(obj):
             {"to_id": to_id, "from_attribute": "symbolic_link"}
         )
     return links
-

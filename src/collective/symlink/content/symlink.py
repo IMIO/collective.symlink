@@ -231,7 +231,7 @@ class Symlink(Container):
         # we have to define a property because self.title always works for a dexterity object and returns '',
         # even if there is no title attribute. => self.title don't pass in __getattr__
         if self._link is None:
-            return u''
+            return u""
         return aq_inner(self._link).title
 
     @title.setter
@@ -246,7 +246,7 @@ class Symlink(Container):
         # we have to define a property because self.description always works for a dexterity object and returns '',
         # even if there is no title attribute. => self.description don't pass in __getattr__
         if self._link is None:
-            return u''
+            return u""
         return aq_inner(self._link).description
 
     @description.setter

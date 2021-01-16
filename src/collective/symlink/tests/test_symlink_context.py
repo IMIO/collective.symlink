@@ -56,9 +56,7 @@ class TestSymlinkAdaptedContext(unittest.TestCase):
         self.assertEqual("link", self.link.id)
 
     def test_url(self):
-        self.assertEqual(
-            "/plone/folder/link", '/'.join(self.link.getPhysicalPath())
-        )
+        self.assertEqual("/plone/folder/link", "/".join(self.link.getPhysicalPath()))
 
     def test_title(self):
         self.assertEqual("Title", self.link.Title())
@@ -89,9 +87,7 @@ class TestSymlinkAdaptedContext(unittest.TestCase):
         self.assertEqual("Title", self.base.title)
         self.assertEqual("Description", self.base.description)
 
-        brains = api.content.find(
-            context=self.portal, portal_type="Document"
-        )
+        brains = api.content.find(context=self.portal, portal_type="Document")
         self.assertEqual(2, len(brains))
         for b in brains:
             self.assertEqual("Title", b.Title)
@@ -100,9 +96,7 @@ class TestSymlinkAdaptedContext(unittest.TestCase):
         self.base.title = "New Title"
         self.base.description = "New Description"
         notify(ObjectModifiedEvent(self.base))
-        brains = api.content.find(
-            context=self.portal, portal_type="Document"
-        )
+        brains = api.content.find(context=self.portal, portal_type="Document")
         self.assertEqual(2, len(brains))
         for b in brains:
             self.assertEqual("New Title", b.Title)
