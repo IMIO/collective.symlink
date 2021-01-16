@@ -84,11 +84,50 @@ class DelegatingSpecification(ObjectSpecificationDescriptor):
         return provided
 
 
+class SubItemDelegatingSpecification(ObjectSpecificationDescriptor):
+    """
+    Get from collective.alias
+    A __providedBy__ decorator that returns the interfaces provided by
+    the object, plus those of the cached object.
+    """
+
+    def __get__(self, inst, cls=None):
+        # We're looking at a class - fall back on default
+        if inst is None:
+            return getObjectSpecification(cls)
+
+        # Find the cached value.
+        cache = getattr(inst, "_v__providedBy__", None)
+
+        # Find the data we need to know if our cache needs to be invalidated
+        provided = link_provides = getattr(inst._context, "__provides__", None)
+
+        # See if we have a valid cache, and if so return it
+        if cache is not None:
+            cached_mtime, cached_provides, cached_provided = cache
+
+            if inst._p_mtime == cached_mtime and link_provides is cached_provides:
+                return cached_provided
+
+        # If the instance doesn't have a __provides__ attribute, get the
+        # interfaces implied by the class as a starting point.
+        if provided is None:
+            provided = implementedBy(cls)
+
+        # Add the interfaces provided by the target, but ensure that some problematic
+        # interfaces are removed
+        provided += providedBy(inst._context) - IIterateAware - IVersioningSupport
+        provided += ISymlinkMarker
+
+        inst._v__providedBy__ = inst._p_mtime, link_provides, provided
+        return provided
+
+
 @implementer(ISymlinkMarker)
 class SymlinkSubItem(Container):
 
     cmf_uid = None
-    __providedBy__ = DelegatingSpecification()
+    __providedBy__ = SubItemDelegatingSpecification()
 
     def __init__(self, context):
         self._context = context
