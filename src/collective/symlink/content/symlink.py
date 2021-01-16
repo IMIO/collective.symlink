@@ -183,6 +183,9 @@ class SymlinkSubItem(Container):
     def allowedContentTypes(self):
         return []
 
+    def __contains__(self, key):
+        return self._context.__contains__(key)
+
     @property
     def portal_type(self):
         return self._context.portal_type
@@ -332,6 +335,9 @@ class Symlink(Container):
 
     def allowedContentTypes(self):
         return []
+
+    def __contains__(self, key):
+        return self._link.__contains__(key)
 
     @property
     def _link(self):
