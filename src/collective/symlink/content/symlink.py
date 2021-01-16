@@ -183,6 +183,22 @@ class SymlinkSubItem(Container):
     def allowedContentTypes(self):
         return []
 
+    def __get_uid(self):
+        link = aq_inner(self._context).aq_parent
+        while not ISymlink.providedBy(link):
+            link = aq_inner(link).aq_parent
+        uuids = getattr(link, "_link.uuids", None)
+        path = self._context.getPhysicalPath()
+        if uuids is None:
+            uuids = {}
+            setattr(link, "_link.uuids", uuids)
+        if path not in uuids:
+            uuids[path] = queryUtility(IUUIDGenerator)()
+        return uuids[path]
+
+    def UID(self):
+        return self.__get_uid()
+
     def __getattr__(self, key):
         """ Pass only here if key attribute is not set on symlink ! """
         # Inspired by collective.alias
@@ -194,18 +210,7 @@ class SymlinkSubItem(Container):
             raise AttributeError(key)
 
         if key == "_plone.uuid":
-            # XXX Must be adapted to find the correct parent (link)
-            link = aq_inner(self._context).aq_parent
-            while not ISymlink.providedBy(link):
-                link = aq_inner(link).aq_parent
-            uuids = getattr(link, "_link.uuids", None)
-            path = self._context.getPhysicalPath()
-            if uuids is None:
-                uuids = {}
-                setattr(link, "_link.uuids", uuids)
-            if path not in uuids:
-                uuids[path] = queryUtility(IUUIDGenerator)()
-            return uuids[path]
+            return self.__get_uid()
 
         context = aq_inner(self._context)
 
