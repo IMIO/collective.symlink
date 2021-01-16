@@ -183,6 +183,10 @@ class SymlinkSubItem(Container):
     def allowedContentTypes(self):
         return []
 
+    @property
+    def portal_type(self):
+        return self._context.portal_type
+
     def __get_uid(self):
         link = aq_inner(self._context).aq_parent
         while not ISymlink.providedBy(link):
